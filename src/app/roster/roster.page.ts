@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActionSheetController, AlertController } from '@ionic/angular';
+import { ActionSheetController, AlertController, ToastController } from '@ionic/angular';
 import { Student, StudentsService } from '../students.service';
 
 @Component({
@@ -13,7 +13,8 @@ export class RosterPage implements OnInit {
   constructor(
     private actionSheetController: ActionSheetController,
     private alertController: AlertController,
-    private studentService: StudentsService) { }
+    private studentService: StudentsService,
+    private toastController: ToastController) { }
 
   ngOnInit() {
     this.students = this.studentService.getAll();
@@ -22,6 +23,16 @@ export class RosterPage implements OnInit {
   async deleteStudent(student: Student) {
     this.students = this.students
       .filter(x => x.id !== student.id);
+
+    const alert = await this.toastController.create(
+      {
+        message:
+        `${student.firstName} ${student.lastName} deleted.`,
+        position: 'top',
+        duration: 3000
+      });
+
+    await alert.present();
   }
 
   async presentActionSheet(student: Student) {
