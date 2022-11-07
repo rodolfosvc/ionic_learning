@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActionSheetController } from '@ionic/angular';
+import { ActionSheetController, AlertController } from '@ionic/angular';
 import { Student, StudentsService } from '../students.service';
 
 @Component({
@@ -12,6 +12,7 @@ export class RosterPage implements OnInit {
 
   constructor(
     private actionSheetController: ActionSheetController,
+    private alertController: AlertController,
     private studentService: StudentsService) { }
 
   ngOnInit() {
@@ -20,43 +21,66 @@ export class RosterPage implements OnInit {
 
   async deleteStudent(student: Student) {
     this.students = this.students
-     .filter(x => x.id !== student.id);
- }
+      .filter(x => x.id !== student.id);
+  }
 
- async presentActionSheet(student: Student) {
-  const actionSheet = await this.actionSheetController
-  .create({
-    header: `${student.firstName} ${student.lastName}`,
-    buttons: [{
-      text: 'Mark Present',
-      icon: 'eye',
-      handler: () => {
-        student.status = 'present';
-      }
-    }, {
-      text: 'Mark Absent',
-      icon: 'eye-off-outline',
-      handler: () => {
-        student.status = 'absent';
-      }
-    }, {
-      text: 'Delete',
-      icon: 'trash',
-      role: 'destructive',
-      handler: () => {
-        this.deleteStudent(student);
-      }
-    }, {
-      text: 'Cancel',
-      icon: 'close',
-      role: 'cancel',
-      handler: () => {
-        console.log('Cancel clicked');
-      }
-    }]
-  });
+  async presentActionSheet(student: Student) {
+    const actionSheet = await this.actionSheetController
+      .create({
+        header: `${student.firstName} ${student.lastName}`,
+        buttons: [{
+          text: 'Mark Present',
+          icon: 'eye',
+          handler: () => {
+            student.status = 'present';
+          }
+        }, {
+          text: 'Mark Absent',
+          icon: 'eye-off-outline',
+          handler: () => {
+            student.status = 'absent';
+          }
+        }, {
+          text: 'Delete',
+          icon: 'trash',
+          role: 'destructive',
+          handler: () => {
+            this.presentDeleteAlert(student);
+          }
+        }, {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }]
+      });
 
-  await actionSheet.present();
-}
+    await actionSheet.present();
+  }
+
+  async presentDeleteAlert(student: Student) {
+    const alert = await this.alertController.create(
+      {
+        header: 'Delete this student?',
+        subHeader:
+          `${student.firstName} ${student.lastName}`,
+        message: 'This operation cannot be undone.',
+        buttons: [
+          {
+            text: 'Delete',
+            handler: () => this.deleteStudent(student)
+          },
+          {
+            text: 'Never mind',
+            role: 'cancel'
+          }
+        ]
+      }
+    );
+
+    await alert.present();
+  }
 
 }
